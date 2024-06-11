@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-area" id="chatArea">
+            <!-- Sample messages -->
+            <div class="chat-message bot-message">Hello! How can I assist you today?</div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="userInput" class="text-input" placeholder="Type your message here..." onkeydown="handleEnterKey(event)">
+            <button class="send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            var userInput = document.getElementById("userInput").value;
+            var chatArea = document.getElementById("chatArea");
+    
+            if (userInput.trim() !== "") {
+                var userMessage = document.createElement("div");
+                userMessage.className = "chat-message user-message";
+                userMessage.textContent = userInput;
+    
+                chatArea.appendChild(userMessage);
+    
+                // Scroll to the bottom
+                chatArea.scrollTop = chatArea.scrollHeight;
+    
+                // Clear the input box
+                document.getElementById("userInput").value = "";
+    
+                // Send the message to the backend
+                const response = await fetch("/get_response", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({"message": userInput})
+                });
+    
+                const data = await response.json();
+    
+                var botMessage = document.createElement("div");
+                botMessage.className = "chat-message bot-message";
+                botMessage.textContent = data.response;
+    
+                chatArea.appendChild(botMessage);
+    
+                // Scroll to the bottom
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+    
+        function handleEnterKey(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
